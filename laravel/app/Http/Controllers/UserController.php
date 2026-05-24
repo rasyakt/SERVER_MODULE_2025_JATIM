@@ -22,7 +22,11 @@ class UserController extends Controller
             'totalElements' => $users->count(),
             'content' => $users->map(function($user) {
                 return [
+                    'id' => $user->id,
                     'username' => $user->username,
+                    'role' => $user->role,
+                    'is_blocked' => $user->is_blocked,
+                    'block_reason' => $user->block_reason,
                     'last_login_at' => $user->last_login_at ? $user->last_login_at->format('Y-m-d H:i:s') : '',
                     'created_at' => $user->created_at ? $user->created_at->format('Y-m-d H:i:s') : '',
                     'updated_at' => $user->updated_at ? $user->updated_at->format('Y-m-d H:i:s') : '',
@@ -98,6 +102,18 @@ class UserController extends Controller
                 'status' => 'not-found',
                 'message' => 'User Not found'
             ], 403); // Specific 403 for not found!
+        }
+
+        // Handle block/unblock toggles separately
+        if ($request->has('is_blocked')) {
+            $user->update([
+                'is_blocked' => (bool) $request->is_blocked,
+                'block_reason' => $request->block_reason,
+            ]);
+            return response()->json([
+                'status' => 'success',
+                'username' => $user->username
+            ], 201);
         }
 
         $validator = Validator::make($request->all(), [
