@@ -156,10 +156,15 @@ const gameIframeUrl = computed(() => {
     <div v-else>
       <!-- Game Info Header -->
       <div class="game-header card flex-between mb-6">
-        <div>
-          <h1>{{ game.title }}</h1>
-          <p class="mb-2">Developed by: <strong>{{ game.author }}</strong> • {{ game.scoreCount }} total score submissions</p>
-          <p>{{ game.description }}</p>
+        <div class="header-content">
+          <div v-if="game.thumbnail" class="game-header-thumb-wrapper">
+            <img :src="'http://127.0.0.1:8000' + game.thumbnail" :alt="game.title + ' Thumbnail'" class="game-header-thumb" />
+          </div>
+          <div class="game-header-details">
+            <h1>{{ game.title }}</h1>
+            <p class="mb-2">Developed by: <strong>{{ game.author }}</strong> • {{ game.scoreCount }} total score submissions</p>
+            <p>{{ game.description }}</p>
+          </div>
         </div>
         <div v-if="isAuthor" class="author-actions">
           <router-link :to="'/games/' + slug + '/manage'" class="btn btn-warning"><span class="material-symbols-outlined">settings</span> Manage Game</router-link>
@@ -256,6 +261,45 @@ const gameIframeUrl = computed(() => {
 <style scoped>
 .game-header {
   padding: 2rem;
+}
+
+.header-content {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.game-header-thumb-wrapper {
+  width: 160px;
+  height: 100px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.game-header-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.game-header-details {
+  flex-grow: 1;
+}
+
+@media (max-width: 600px) {
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .game-header-thumb-wrapper {
+    width: 100%;
+    height: 150px;
+  }
 }
 
 .grid-layout {

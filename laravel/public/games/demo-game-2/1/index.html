@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cosmic Odyssey II: Supernova - Demo Version</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: #fff;
+      font-family: 'Courier New', Courier, monospace;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      user-select: none;
+    }
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      aspect-ratio: 16/9;
+      background-color: #022c22;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      border: 2px solid #065f46;
+      border-radius: 4px;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+    }
+    #splash {
+      position: absolute;
+      inset: 0;
+      background: rgba(2, 44, 34, 0.85);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      transition: opacity 0.5s ease;
+    }
+    .splash-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('game_screen.png');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.3;
+      z-index: -1;
+    }
+    h1 {
+      font-size: 3.5rem;
+      margin: 0 0 1rem 0;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: #10b981;
+      text-shadow: 0 0 10px rgba(16, 185, 129, 0.8), 0 0 20px rgba(16, 185, 129, 0.4);
+      animation: pulse 2s infinite alternate;
+    }
+    p {
+      font-size: 1.2rem;
+      color: #a7f3d0;
+      margin-bottom: 2rem;
+    }
+    .btn {
+      padding: 0.75rem 2rem;
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #fff;
+      background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.8);
+      background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+    }
+    #gameover-screen {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+    .gameover-title {
+      font-size: 4rem;
+      color: #ef4444;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+      letter-spacing: 6px;
+      font-weight: bold;
+    }
+    .score-display {
+      font-size: 1.75rem;
+      color: #fbbf24;
+      margin-bottom: 2rem;
+      font-weight: bold;
+    }
+    .instructions {
+      position: absolute;
+      bottom: 1.5rem;
+      color: #6ee7b7;
+      font-size: 0.9rem;
+      text-align: center;
+      line-height: 1.5;
+      opacity: 0.8;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.98); opacity: 0.9; }
+      100% { transform: scale(1.02); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <!-- Splash Screen -->
+    <div id="splash">
+      <div class="splash-bg"></div>
+      <h1>Odyssey II</h1>
+      <p>Supernova Edition (v2.0 Demo)</p>
+      <button class="btn" id="start-btn">Start Mission</button>
+      <div class="instructions">
+        CONTROLS: Use MOUSE or LEFT/RIGHT Arrow Keys to Move<br>
+        CLICK or SPACEBAR to Fire Lasers!
+      </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameover-screen">
+      <div class="gameover-title">GAME OVER</div>
+      <div class="score-display">Your Score: <span id="final-score">0</span></div>
+      <button class="btn" id="restart-btn">Restart Mission</button>
+    </div>
+
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const splash = document.getElementById('splash');
+    const startBtn = document.getElementById('start-btn');
+    const gameoverScreen = document.getElementById('gameover-screen');
+    const restartBtn = document.getElementById('restart-btn');
+    const finalScoreSpan = document.getElementById('final-score');
+
+    // Audio Context Setup for Sound Effects (Web Audio API)
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playLaserSound() {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.12);
+
+      gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.12);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.12);
+    }
+
+    function playExplosionSound() {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+      osc.frequency.linearRampToValueAtTime(30, audioCtx.currentTime + 0.35);
+
+      gainNode.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.35);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.35);
+    }
+
+    function playGameOverSound() {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      osc.type = 'sawtooth';
+      const now = audioCtx.currentTime;
+      osc.frequency.setValueAtTime(450, now);
+      osc.frequency.setValueAtTime(360, now + 0.2);
+      osc.frequency.setValueAtTime(270, now + 0.4);
+      osc.frequency.exponentialRampToValueAtTime(60, now + 0.9);
+
+      gainNode.gain.setValueAtTime(0.15, now);
+      gainNode.gain.linearRampToValueAtTime(0, now + 0.9);
+
+      osc.start();
+      osc.stop(now + 0.9);
+    }
+
+    // Set canvas dimensions
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Game Variables
+    let gameActive = false;
+    let score = 0;
+    let level = 1;
+    let player = {
+      x: 0,
+      y: 0,
+      width: 44,
+      height: 38,
+      speed: 10
+    };
+
+    let keys = {};
+    let mouseX = null;
+    let lasers = [];
+    let enemies = [];
+    let particles = [];
+    let stars = [];
+    let enemySpawnTimer = 0;
+    let shootCooldown = 0;
+
+    // Generate Background Stars
+    function generateStars() {
+      stars = [];
+      for (let i = 0; i < 90; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 2 + 0.5,
+          speed: Math.random() * 2 + 0.8
+        });
+      }
+    }
+
+    // Controls listeners
+    window.addEventListener('keydown', (e) => {
+      keys[e.key] = true;
+      if (e.key === ' ' && gameActive) {
+        fireLaser();
+        e.preventDefault();
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      keys[e.key] = false;
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = ((e.clientX - rect.left) / rect.width) * canvas.width;
+    });
+
+    canvas.addEventListener('click', () => {
+      if (gameActive) {
+        fireLaser();
+      }
+    });
+
+    function fireLaser() {
+      if (shootCooldown > 0) return;
+      lasers.push({
+        x: player.x + player.width / 2,
+        y: player.y,
+        width: 5,
+        height: 18,
+        speed: 14
+      });
+      shootCooldown = 10; // faster shooter!
+      playLaserSound();
+    }
+
+    function spawnEnemy() {
+      const size = Math.random() * 25 + 18;
+      enemies.push({
+        x: Math.random() * (canvas.width - size),
+        y: -size,
+        width: size,
+        height: size,
+        speed: Math.random() * 2.5 + 2.0 + (level * 0.35),
+        color: `hsl(${Math.random() * 60 + 100}, 95%, 50%)`, // Emerald/green alien colors!
+        points: Math.round(size * 1.5)
+      });
+    }
+
+    function createExplosion(x, y, color) {
+      for (let i = 0; i < 20; i++) {
+        particles.push({
+          x: x,
+          y: y,
+          vx: (Math.random() - 0.5) * 10,
+          vy: (Math.random() - 0.5) * 10,
+          radius: Math.random() * 3.5 + 1,
+          color: color,
+          alpha: 1,
+          decay: Math.random() * 0.035 + 0.018
+        });
+      }
+      playExplosionSound();
+    }
+
+    function startNewGame() {
+      initAudio();
+      splash.style.opacity = '0';
+      setTimeout(() => splash.style.display = 'none', 500);
+      gameoverScreen.style.display = 'none';
+      
+      score = 0;
+      level = 1;
+      lasers = [];
+      enemies = [];
+      particles = [];
+      enemySpawnTimer = 0;
+      shootCooldown = 0;
+      
+      player.x = canvas.width / 2 - player.width / 2;
+      player.y = canvas.height - 65;
+      
+      generateStars();
+      gameActive = true;
+    }
+
+    function gameOver() {
+      gameActive = false;
+      finalScoreSpan.innerText = score;
+      gameoverScreen.style.display = 'flex';
+      playGameOverSound();
+    }
+
+    // Game Loop
+    function update() {
+      if (!gameActive) return;
+
+      // Player Movement
+      if (mouseX !== null) {
+        player.x = mouseX - player.width / 2;
+      } else {
+        if (keys['ArrowLeft'] || keys['a']) {
+          player.x -= player.speed;
+        }
+        if (keys['ArrowRight'] || keys['d']) {
+          player.x += player.speed;
+        }
+      }
+
+      // Constrain player
+      if (player.x < 0) player.x = 0;
+      if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
+
+      // Update stars
+      stars.forEach(star => {
+        star.y += star.speed;
+        if (star.y > canvas.height) {
+          star.y = 0;
+          star.x = Math.random() * canvas.width;
+        }
+      });
+
+      // Update cooldown
+      if (shootCooldown > 0) shootCooldown--;
+
+      // Update Lasers
+      lasers.forEach((laser, idx) => {
+        laser.y -= laser.speed;
+        if (laser.y < -laser.height) {
+          lasers.splice(idx, 1);
+        }
+      });
+
+      // Spawn Enemies
+      enemySpawnTimer++;
+      if (enemySpawnTimer > Math.max(25, 70 - level * 5)) {
+        spawnEnemy();
+        enemySpawnTimer = 0;
+      }
+
+      // Update Enemies
+      enemies.forEach((enemy, eIdx) => {
+        enemy.y += enemy.speed;
+
+        // Game over if enemy passes screen bottom
+        if (enemy.y > canvas.height) {
+          enemies.splice(eIdx, 1);
+          gameOver();
+          return;
+        }
+
+        // Collision Check: Enemy vs Player
+        if (
+          player.x < enemy.x + enemy.width &&
+          player.x + player.width > enemy.x &&
+          player.y < enemy.y + enemy.height &&
+          player.y + player.height > enemy.y
+        ) {
+          createExplosion(player.x + player.width/2, player.y + player.height/2, '#ef4444');
+          gameOver();
+          return;
+        }
+
+        // Collision Check: Enemy vs Lasers
+        lasers.forEach((laser, lIdx) => {
+          if (
+            laser.x < enemy.x + enemy.width &&
+            laser.x + laser.width > enemy.x &&
+            laser.y < enemy.y + enemy.height &&
+            laser.y + laser.height > enemy.y
+          ) {
+            createExplosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, enemy.color);
+            enemies.splice(eIdx, 1);
+            lasers.splice(lIdx, 1);
+            score += enemy.points;
+            
+            if (score > level * 700) {
+              level++;
+            }
+          }
+        });
+      });
+
+      // Update Particles
+      particles.forEach((particle, idx) => {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.alpha -= particle.decay;
+        if (particle.alpha <= 0) {
+          particles.splice(idx, 1);
+        }
+      });
+    }
+
+    function draw() {
+      // Clear Screen with distinct dark emerald background
+      ctx.fillStyle = '#021812';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Render Stars
+      ctx.fillStyle = '#99f6e4';
+      stars.forEach(star => {
+        ctx.globalAlpha = star.speed / 2.8;
+        ctx.fillRect(star.x, star.y, star.size, star.size);
+      });
+      ctx.globalAlpha = 1.0;
+
+      if (!gameActive) {
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.05)';
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height / 2, 220, 0, Math.PI * 2);
+        ctx.fill();
+        return;
+      }
+
+      // Draw Lasers (glowing emerald green)
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#34d399';
+      ctx.fillStyle = '#10b981';
+      lasers.forEach(laser => {
+        ctx.fillRect(laser.x - laser.width / 2, laser.y, laser.width, laser.height);
+      });
+      ctx.shadowBlur = 0;
+
+      // Draw Enemies (glowing hexagonal pods)
+      enemies.forEach(enemy => {
+        ctx.fillStyle = enemy.color;
+        ctx.beginPath();
+        ctx.moveTo(enemy.x + enemy.width / 2, enemy.y);
+        ctx.lineTo(enemy.x + enemy.width, enemy.y + enemy.height / 3);
+        ctx.lineTo(enemy.x + enemy.width, enemy.y + (enemy.height * 2) / 3);
+        ctx.lineTo(enemy.x + enemy.width / 2, enemy.y + enemy.height);
+        ctx.lineTo(enemy.x, enemy.y + (enemy.height * 2) / 3);
+        ctx.lineTo(enemy.x, enemy.y + enemy.height / 3);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(enemy.x + enemy.width / 2 - 2, enemy.y + enemy.height / 2 - 2, 4, 4);
+      });
+
+      // Draw Player Space Fighter (Sleek Emerald Starfighter)
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = '#10b981';
+      
+      // Dual Booster Flames
+      ctx.fillStyle = Math.random() > 0.5 ? '#10b981' : '#f59e0b';
+      ctx.fillRect(player.x + 8, player.y + player.height, 6, 10);
+      ctx.fillRect(player.x + player.width - 14, player.y + player.height, 6, 10);
+
+      // Main Ship Body
+      ctx.fillStyle = '#ecfdf5';
+      ctx.beginPath();
+      ctx.moveTo(player.x + player.width / 2, player.y);
+      ctx.lineTo(player.x, player.y + player.height - 8);
+      ctx.lineTo(player.x + player.width / 2, player.y + player.height - 12);
+      ctx.lineTo(player.x + player.width, player.y + player.height - 8);
+      ctx.closePath();
+      ctx.fill();
+
+      // Green Wings Accent
+      ctx.fillStyle = '#059669';
+      ctx.beginPath();
+      ctx.moveTo(player.x + player.width / 2, player.y + 12);
+      ctx.lineTo(player.x + 3, player.y + player.height - 4);
+      ctx.lineTo(player.x + player.width - 3, player.y + player.height - 4);
+      ctx.closePath();
+      ctx.fill();
+
+      // Red Targeting Radar Cockpit
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.moveTo(player.x + player.width / 2, player.y + 4);
+      ctx.lineTo(player.x + player.width / 2 - 3, player.y + 15);
+      ctx.lineTo(player.x + player.width / 2 + 3, player.y + 15);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.shadowBlur = 0;
+
+      // Draw Particles
+      particles.forEach(p => {
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1.0;
+
+      // Draw HUD
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 16px "Courier New", monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(`SCORE: ${score.toLocaleString()}`, 20, 30);
+      ctx.fillText(`LEVEL: ${level}`, 20, 55);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillText(`HYPERDRIVE: CHARGING`, canvas.width - 20, 30);
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    startBtn.addEventListener('click', startNewGame);
+    restartBtn.addEventListener('click', startNewGame);
+
+    generateStars();
+    resizeCanvas();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
