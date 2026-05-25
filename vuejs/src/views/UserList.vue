@@ -14,6 +14,7 @@ const userIdToEdit = ref(null);
 const usernameInput = ref('');
 const passwordInput = ref('');
 const modalErrorMsg = ref('');
+const showPasswordModal = ref(false);
 
 // Block popup variables
 const isBlockModalOpen = ref(false);
@@ -44,6 +45,7 @@ const openCreateModal = () => {
   usernameInput.value = '';
   passwordInput.value = '';
   modalErrorMsg.value = '';
+  showPasswordModal.value = false;
   isModalOpen.value = true;
 };
 
@@ -53,6 +55,7 @@ const openEditModal = (user) => {
   usernameInput.value = user.username;
   passwordInput.value = ''; // Leave password input blank for edit
   modalErrorMsg.value = '';
+  showPasswordModal.value = false;
   isModalOpen.value = true;
 };
 
@@ -272,14 +275,19 @@ const handleBlockSubmit = async () => {
           </div>
           <div class="form-group">
             <label class="form-label" for="modal-password">Password</label>
-            <input 
-              type="password" 
-              id="modal-password" 
-              v-model="passwordInput" 
-              class="form-input" 
-              placeholder="Min 5 characters" 
-              required 
-            />
+            <div class="password-wrapper">
+              <input 
+                :type="showPasswordModal ? 'text' : 'password'" 
+                id="modal-password" 
+                v-model="passwordInput" 
+                class="form-input" 
+                placeholder="Min 5 characters" 
+                required 
+              />
+              <button type="button" class="toggle-password-btn" @click="showPasswordModal = !showPasswordModal" aria-label="Toggle Password Visibility">
+                <span class="material-symbols-outlined" style="font-size: 1.25rem;">{{ showPasswordModal ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
           </div>
 
           <div class="flex-between mt-4">
@@ -347,5 +355,35 @@ const handleBlockSubmit = async () => {
 
 textarea.form-input {
   resize: vertical;
+}
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper .form-input {
+  padding-right: 2.75rem;
+}
+
+.toggle-password-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.toggle-password-btn:hover {
+  color: var(--text-main);
 }
 </style>

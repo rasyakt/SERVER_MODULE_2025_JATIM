@@ -8,6 +8,12 @@ const router = useRouter();
 const activeTab = ref('signin'); // 'signin' or 'signup'
 const username = ref('');
 const password = ref('');
+const confirmPassword = ref('');
+
+// Password Visibility toggles
+const showPassword = ref(false);
+const showRegPassword = ref(false);
+const showConfirmPassword = ref(false);
 
 const errorMsg = ref('');
 const successMsg = ref('');
@@ -16,8 +22,12 @@ const loading = ref(false);
 const resetForm = () => {
   username.value = '';
   password.value = '';
+  confirmPassword.value = '';
   errorMsg.value = '';
   successMsg.value = '';
+  showPassword.value = false;
+  showRegPassword.value = false;
+  showConfirmPassword.value = false;
 };
 
 const handleSignIn = async () => {
@@ -53,8 +63,13 @@ const handleSignIn = async () => {
 };
 
 const handleSignUp = async () => {
-  if (!username.value || !password.value) {
-    errorMsg.value = 'Username and password are required.';
+  if (!username.value || !password.value || !confirmPassword.value) {
+    errorMsg.value = 'All fields are required.';
+    return;
+  }
+
+  if (password.value !== confirmPassword.value) {
+    errorMsg.value = 'Passwords do not match.';
     return;
   }
 
@@ -141,14 +156,19 @@ const handleSignUp = async () => {
         </div>
         <div class="form-group">
           <label class="form-label" for="password">Password</label>
-          <input 
-            type="password" 
-            id="password" 
-            v-model="password" 
-            class="form-input" 
-            placeholder="Enter password" 
-            required 
-          />
+          <div class="password-wrapper">
+            <input 
+              :type="showPassword ? 'text' : 'password'" 
+              id="password" 
+              v-model="password" 
+              class="form-input" 
+              placeholder="Enter password" 
+              required 
+            />
+            <button type="button" class="toggle-password-btn" @click="showPassword = !showPassword" aria-label="Toggle Password Visibility">
+              <span class="material-symbols-outlined" style="font-size: 1.25rem;">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
         </div>
         <button type="submit" class="btn btn-primary btn-block" :disabled="loading">
           {{ loading ? 'Signing In...' : 'Sign In' }}
@@ -170,14 +190,35 @@ const handleSignUp = async () => {
         </div>
         <div class="form-group">
           <label class="form-label" for="reg-password">Password</label>
-          <input 
-            type="password" 
-            id="reg-password" 
-            v-model="password" 
-            class="form-input" 
-            placeholder="Min 5, max 10 characters" 
-            required 
-          />
+          <div class="password-wrapper">
+            <input 
+              :type="showRegPassword ? 'text' : 'password'" 
+              id="reg-password" 
+              v-model="password" 
+              class="form-input" 
+              placeholder="Min 5, max 10 characters" 
+              required 
+            />
+            <button type="button" class="toggle-password-btn" @click="showRegPassword = !showRegPassword" aria-label="Toggle Password Visibility">
+              <span class="material-symbols-outlined" style="font-size: 1.25rem;">{{ showRegPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="confirm-password">Confirm Password</label>
+          <div class="password-wrapper">
+            <input 
+              :type="showConfirmPassword ? 'text' : 'password'" 
+              id="confirm-password" 
+              v-model="confirmPassword" 
+              class="form-input" 
+              placeholder="Confirm your password" 
+              required 
+            />
+            <button type="button" class="toggle-password-btn" @click="showConfirmPassword = !showConfirmPassword" aria-label="Toggle Password Visibility">
+              <span class="material-symbols-outlined" style="font-size: 1.25rem;">{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
         </div>
         <button type="submit" class="btn btn-primary btn-block" :disabled="loading">
           {{ loading ? 'Registering...' : 'Sign Up' }}
@@ -245,5 +286,35 @@ const handleSignUp = async () => {
   width: 100%;
   padding: 0.75rem;
   margin-top: 0.5rem;
+}
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper .form-input {
+  padding-right: 2.75rem;
+}
+
+.toggle-password-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.toggle-password-btn:hover {
+  color: var(--text-main);
 }
 </style>
