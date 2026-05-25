@@ -43,6 +43,65 @@ const getThumbnail = (thumbnail) => {
   }
   return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f1f5f9"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="10" fill="%2394a3b8">No Thumbnail</text></svg>';
 };
+
+// Game Creation State
+const isGameModalOpen = ref(false);
+const titleInput = ref('');
+const descInput = ref('');
+const gameErrorMsg = ref('');
+const creatingGame = ref(false);
+
+const currentUser = JSON.parse(localStorage.getItem('user'));
+const isDeveloper = computed(() => {
+  return currentUser && currentUser.role === 'dev';
+});
+const isMyProfile = computed(() => {
+  return currentUser && profile.value && currentUser.username === profile.value.username;
+});
+
+const openCreateGameModal = () => {
+  titleInput.value = '';
+  descInput.value = '';
+  gameErrorMsg.value = '';
+  isGameModalOpen.value = true;
+};
+
+const handleCreateGame = async () => {
+  if (!titleInput.value.trim() || !descInput.value.trim()) {
+    gameErrorMsg.value = 'All fields are required.';
+    return;
+  }
+
+  creatingGame.value = true;
+  gameErrorMsg.value = '';
+
+  try {
+    const response = await api.post('/games', {
+      title: titleInput.value.trim(),
+      description: descInput.value.trim()
+    });
+
+    if (response.data.status === 'success') {
+      isGameModalOpen.value = false;
+      // Refresh user profile to show newly created game
+      fetchProfile();
+    }
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const data = error.response.data;
+      if (data.violations) {
+        const fields = Object.keys(data.violations);
+        gameErrorMsg.value = data.violations[fields[0]].message;
+      } else {
+        gameErrorMsg.value = data.message || 'Failed to create game.';
+      }
+    } else {
+      gameErrorMsg.value = 'Failed to connect to backend server.';
+    }
+  } finally {
+    creatingGame.value = false;
+  }
+};
 </script>
 
 <template>
@@ -61,12 +120,28 @@ const getThumbnail = (thumbnail) => {
 
     <div v-else>
       <!-- User Profile Header -->
-      <div class="profile-header card mb-6">
-        <div class="profile-avatar"><span class="material-symbols-outlined" style="font-size: 3.5rem; color: var(--text-muted);">person</span></div>
-        <div>
-          <h1>{{ profile.username }}</h1>
-          <p>Registered at: <strong>{{ new Date(profile.registeredTimestamp).toLocaleDateString() }}</strong></p>
+      <div class="profile-header card flex-between mb-6">
+        <div class="flex-align" style="gap: 2rem;">
+          <div class="profile-avatar"><span class="material-symbols-outlined" style="font-size: 3.5rem; color: var(--text-muted);">person</span></div>
+          <div>
+            <h1>{{ profile.username }}</h1>
+            <p>Registered at: <strong>{{ new Date(profile.registeredTimestamp).toLocaleDateString() }}</strong></p>
+          </div>
         </div>
+        <div v-if="isDeveloper && isMyProfile" class="profile-actions">
+          <button @click="openCreateGameModal" class="btn btn-primary">
+            <span class="material-symbols-outlined">add</span> Create New Game
+          </button>
+        </div>
+      </div>
+
+      <!-- Welcome Developer Card (Shown only when developer has no games created yet) -->
+      <div v-if="isDeveloper && isMyProfile && (!profile.authoredGames || profile.authoredGames.length === 0)" class="mb-6 card text-center py-8">
+        <h2>No Games Created Yet</h2>
+        <p class="mb-4">As a developer, you can create and upload browser games to the portal!</p>
+        <button @click="openCreateGameModal" class="btn btn-primary">
+          <span class="material-symbols-outlined">add</span> Create Your First Game
+        </button>
       </div>
 
       <!-- Authored Games Section (Omitted if user has not uploaded any games) -->
@@ -129,6 +204,45 @@ const getThumbnail = (thumbnail) => {
         </div>
       </div>
     </div>
+    <!-- Create Game Modal Overlay -->
+    <div v-if="isGameModalOpen" class="modal-overlay">
+      <div class="modal-content">
+        <h2>Create New Game</h2>
+        <div v-if="gameErrorMsg" class="alert alert-danger mb-4">{{ gameErrorMsg }}</div>
+
+        <form @submit.prevent="handleCreateGame">
+          <div class="form-group">
+            <label class="form-label" for="game-title">Game Title</label>
+            <input 
+              type="text" 
+              id="game-title" 
+              v-model="titleInput" 
+              class="form-input" 
+              placeholder="Min 3, max 60 characters" 
+              required 
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="game-desc">Description</label>
+            <textarea 
+              id="game-desc" 
+              v-model="descInput" 
+              class="form-input" 
+              rows="3" 
+              placeholder="Min 0, max 200 characters" 
+              required
+            ></textarea>
+          </div>
+
+          <div class="flex-between mt-4">
+            <button @click="isGameModalOpen = false" type="button" class="btn btn-secondary">Cancel</button>
+            <button type="submit" class="btn btn-primary" :disabled="creatingGame">
+              {{ creatingGame ? 'Creating...' : 'Create Game' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -138,6 +252,22 @@ const getThumbnail = (thumbnail) => {
   display: flex;
   align-items: center;
   gap: 2rem;
+}
+
+@media (max-width: 600px) {
+  .profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+  
+  .profile-actions {
+    width: 100%;
+  }
+  
+  .profile-actions button {
+    width: 100%;
+  }
 }
 
 .profile-avatar {

@@ -78,6 +78,13 @@ class GameController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->user()->role !== 'dev') {
+            return response()->json([
+                'status' => 'forbidden',
+                'message' => 'Only developers are allowed to create games'
+            ], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'title' => 'required|min:3|max:60',
             'description' => 'required|max:200',
@@ -144,6 +151,13 @@ class GameController extends Controller
      */
     public function update(Request $request, $slug)
     {
+        if ($request->user()->role !== 'dev') {
+            return response()->json([
+                'status' => 'forbidden',
+                'message' => 'Only developers are allowed to update games'
+            ], 403);
+        }
+
         $game = Game::where('slug', $slug)->first();
 
         if (!$game) {
@@ -184,6 +198,13 @@ class GameController extends Controller
      */
     public function destroy(Request $request, $slug)
     {
+        if ($request->user()->role !== 'dev') {
+            return response()->json([
+                'status' => 'forbidden',
+                'message' => 'Only developers are allowed to delete games'
+            ], 403);
+        }
+
         $game = Game::where('slug', $slug)->first();
 
         if (!$game) {
@@ -223,6 +244,10 @@ class GameController extends Controller
         }
 
         $user = $pat->tokenable;
+
+        if ($user->role !== 'dev') {
+            return response('Only developers are allowed to upload games', 403)->header('Content-Type', 'text/plain');
+        }
 
         if ($user->is_blocked) {
             return response('User blocked: ' . ($user->block_reason ?? 'You have been blocked by an administrator'), 403)->header('Content-Type', 'text/plain');
