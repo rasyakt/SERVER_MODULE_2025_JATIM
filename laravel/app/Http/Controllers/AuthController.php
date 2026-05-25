@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    /**
-     * Sign Up / Register a new user.
-     */
+    
+
+
     public function signup(Request $request)
     {
         $request->validate([
@@ -21,7 +21,7 @@ class AuthController extends Controller
         $user = User::create([
             'username' => $request->username,
             'password' => Hash::make($request->password),
-            'role' => 'player', // Default role for standard signup
+            'role' => 'player', 
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -36,9 +36,9 @@ class AuthController extends Controller
         ], 201);
     }
 
-    /**
-     * Sign In / Login an existing user.
-     */
+    
+
+
     public function signin(Request $request)
     {
         $request->validate([
@@ -55,7 +55,7 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // Update last login timestamp
+        
         $user->update([
             'last_login_at' => now()
         ]);
@@ -72,9 +72,9 @@ class AuthController extends Controller
         ], 200);
     }
 
-    /**
-     * Sign Out / Logout the authenticated user.
-     */
+    
+
+
     public function signout(Request $request)
     {
         if ($request->user()) {

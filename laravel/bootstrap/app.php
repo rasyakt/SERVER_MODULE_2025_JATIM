@@ -22,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // Custom Validation Errors (Halaman 14)
+        
         $exceptions->render(function (ValidationException $e, Request $request) {
             if ($request->is('api/*')) {
                 $failed = $e->validator->failed();
@@ -41,13 +41,13 @@ return Application::configure(basePath: dirname(__DIR__))
                             $limit = $params['allowed'][0] ?? $params['max'] ?? 0;
                             $msg = 'must be at most ' . $limit . ' characters long';
                         } else {
-                            // Fallback
+                            
                             $msg = $errors->first($field);
                         }
                         $violations[$field] = [
                             'message' => $msg
                         ];
-                        break; // At most one validation per field
+                        break; 
                     }
                 }
 
@@ -59,11 +59,11 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        // Custom Authentication Errors (Halaman 15)
+        
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->is('api/*')) {
                 $authHeader = $request->header('Authorization');
-                // Check also for Sanctum's query or form token if header is missing
+                
                 $tokenParam = $request->input('token');
 
                 if (!$authHeader && !$tokenParam) {
@@ -80,7 +80,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        // Custom Not Found Errors (Halaman 16)
+        
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json([

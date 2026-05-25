@@ -11,9 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
-    /**
-     * Get all platform users (Admin Only).
-     */
+    
+
+
     public function index()
     {
         $users = User::where('role', '!=', 'admin')->get();
@@ -35,9 +35,9 @@ class UserController extends Controller
         ], 200);
     }
 
-    /**
-     * Get all admins list (Admin Only).
-     */
+    
+
+
     public function getAdmins()
     {
         $admins = User::where('role', 'admin')->get();
@@ -55,12 +55,12 @@ class UserController extends Controller
         ], 200);
     }
 
-    /**
-     * Create a user (Admin Only).
-     */
+    
+
+
     public function store(Request $request)
     {
-        // 1. Standard validations (Bootstrap app handles standard formatting)
+        
         $validator = Validator::make($request->all(), [
             'username' => 'required|min:4|max:60',
             'password' => 'required|min:5|max:10',
@@ -70,7 +70,7 @@ class UserController extends Controller
             throw new ValidationException($validator);
         }
 
-        // 2. Uniqueness check for dynamic JATIM format
+        
         if (User::where('username', $request->username)->exists()) {
             return response()->json([
                 'status' => 'invalid',
@@ -81,7 +81,7 @@ class UserController extends Controller
         $user = User::create([
             'username' => $request->username,
             'password' => Hash::make($request->password),
-            'role' => 'player', // Default role
+            'role' => 'player', 
         ]);
 
         return response()->json([
@@ -90,9 +90,9 @@ class UserController extends Controller
         ], 201);
     }
 
-    /**
-     * Update a user (Admin Only).
-     */
+    
+
+
     public function update(Request $request, $id)
     {
         $user = User::find($id);
@@ -101,10 +101,10 @@ class UserController extends Controller
             return response()->json([
                 'status' => 'not-found',
                 'message' => 'User Not found'
-            ], 403); // Specific 403 for not found!
+            ], 403); 
         }
 
-        // Handle block/unblock toggles separately
+        
         if ($request->has('is_blocked')) {
             $user->update([
                 'is_blocked' => (bool) $request->is_blocked,
@@ -125,7 +125,7 @@ class UserController extends Controller
             throw new ValidationException($validator);
         }
 
-        // Check if new username is taken
+        
         if (User::where('username', $request->username)->where('id', '!=', $id)->exists()) {
             return response()->json([
                 'status' => 'invalid',
@@ -141,12 +141,12 @@ class UserController extends Controller
         return response()->json([
             'status' => 'success',
             'username' => $user->username
-        ], 201); // PUT returns 201
+        ], 201); 
     }
 
-    /**
-     * Delete a user (Admin Only).
-     */
+    
+
+
     public function destroy($id)
     {
         $user = User::find($id);
@@ -155,7 +155,7 @@ class UserController extends Controller
             return response()->json([
                 'status' => 'not-found',
                 'message' => 'User Not found'
-            ], 403); // Specific 403 for not found!
+            ], 403); 
         }
 
         $user->delete();
@@ -163,9 +163,9 @@ class UserController extends Controller
         return response()->noContent();
     }
 
-    /**
-     * Get user profile details by username.
-     */
+    
+
+
     public function show(Request $request, $username)
     {
         $user = User::where('username', $username)->first();
@@ -180,10 +180,10 @@ class UserController extends Controller
         $currentUser = $request->user();
         $isSelf = $currentUser && $currentUser->id === $user->id;
 
-        // Authored Games list logic
+        
         $gamesQuery = $user->authoredGames();
         if (!$isSelf) {
-            // Only games with at least one version
+            
             $gamesQuery->whereHas('versions');
         }
 
@@ -198,7 +198,7 @@ class UserController extends Controller
             ];
         }
 
-        // Highscores list logic (highest score per game, sorted alphabetically by game title)
+        
         $scores = Score::where('user_id', $user->id)
             ->with('game')
             ->get();
@@ -222,7 +222,7 @@ class UserController extends Controller
             }
         }
 
-        // Sort alphabetically by game title
+        
         usort($highscores, function($a, $b) {
             return strcmp($a['game']['title'], $b['game']['title']);
         });

@@ -14,11 +14,11 @@ const uploading = ref(false);
 const errorMsg = ref('');
 const successMsg = ref('');
 
-// Form states
+
 const titleInput = ref('');
 const descInput = ref('');
 
-// Zip Upload states
+
 const zipFileInput = ref(null);
 const uploadError = ref('');
 const uploadSuccess = ref('');
@@ -32,7 +32,7 @@ const fetchGameDetails = async () => {
     const response = await api.get(`/games/${slug}`);
     game.value = response.data;
     
-    // Authorization check: Redirect if user is not author of this game
+    
     if (currentUser && game.value.author !== currentUser.username) {
       router.push(`/games/${slug}`);
       return;
@@ -71,7 +71,7 @@ const handleUpdateGame = async () => {
     if (response.data.status === 'success') {
       successMsg.value = 'Game details updated successfully!';
       
-      // Update local state
+      
       game.value.title = titleInput.value.trim();
       game.value.description = descInput.value.trim();
     }
@@ -109,13 +109,13 @@ const handleUploadVersion = async () => {
   uploadError.value = '';
   uploadSuccess.value = '';
 
-  // Prepare Multipart Form Data
+  
   const formData = new FormData();
   formData.append('zipfile', zipFileInput.value);
-  formData.append('token', localStorage.getItem('token')); // Send token as form parameter as requested by PDF!
+  formData.append('token', localStorage.getItem('token')); 
 
   try {
-    // Note: upload endpoint uses raw multipart form, manually authenticated
+    
     const response = await api.post(`/games/${slug}/upload`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -125,13 +125,13 @@ const handleUploadVersion = async () => {
     if (response.data.status === 'success') {
       uploadSuccess.value = `Version ${response.data.version} uploaded and extracted successfully!`;
       zipFileInput.value = null;
-      // Reset input file element
+      
       const fileInputElement = document.getElementById('zip-file');
       if (fileInputElement) fileInputElement.value = '';
     }
   } catch (error) {
-    // PDF page 11 specifies: "upload fails... response must be a plain text explanation of the error."
-    // So the error response might be plain text instead of JSON!
+    
+    
     if (error.response && typeof error.response.data === 'string') {
       uploadError.value = error.response.data;
     } else if (error.response && error.response.data && error.response.data.message) {
@@ -160,7 +160,7 @@ const handleDeleteGame = async () => {
 
 <template>
   <div class="container">
-    <!-- Loading screen -->
+    
     <div v-if="loading" class="text-center py-12">
       <p>Loading developer settings...</p>
     </div>
@@ -181,7 +181,7 @@ const handleDeleteGame = async () => {
       </div>
 
       <div class="grid-layout">
-        <!-- Left: Update Game Info Form -->
+        
         <div class="card">
           <h2>Update Game Details</h2>
           <p class="mb-4">Change the public title and description of your game.</p>
@@ -220,9 +220,9 @@ const handleDeleteGame = async () => {
           </form>
         </div>
 
-        <!-- Right: Version Upload & Delete Game Actions -->
+        
         <div class="right-column">
-          <!-- Zip Upload -->
+          
           <div class="card mb-4">
             <h2>Release New Version</h2>
             <p class="mb-4">Upload a ZIP package containing the game files (index.html, assets, etc.). It will be extracted automatically on the server.</p>
@@ -249,7 +249,7 @@ const handleDeleteGame = async () => {
             </form>
           </div>
 
-          <!-- Danger Zone (Delete) -->
+          
           <div class="card danger-card">
             <h2>Danger Zone</h2>
             <p class="mb-4">Permanently delete this game, including all submitted scores and all versions. This action is irreversible.</p>

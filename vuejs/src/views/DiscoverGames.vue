@@ -6,13 +6,13 @@ const games = ref([]);
 const loading = ref(false);
 const errorMsg = ref('');
 
-// Filter states
+
 const sortBy = ref('title');
 const sortDir = ref('asc');
 
-// Pagination states for Infinite Scroll
+
 const page = ref(0);
-const size = ref(6); // Load 6 games per batch
+const size = ref(6); 
 const totalElements = ref(0);
 const isLastPage = ref(false);
 
@@ -47,7 +47,7 @@ const fetchGames = async (reset = false) => {
       games.value = [...games.value, ...newGames];
     }
 
-    // Determine if we've reached the last page
+    
     isLastPage.value = (page.value + 1) * size.value >= totalElements.value;
   } catch (error) {
     console.error('Failed to fetch games', error);
@@ -63,19 +63,19 @@ const loadMoreGames = () => {
   fetchGames(false);
 };
 
-// Scroll listener for Infinite Scrolling
+
 const handleScroll = () => {
   const scrollTop = window.scrollY || document.documentElement.scrollTop;
   const innerHeight = window.innerHeight;
   const scrollHeight = document.documentElement.scrollHeight;
 
-  // Trigger load when scrolled close (within 150px) to the bottom
+  
   if (scrollHeight - (scrollTop + innerHeight) < 150) {
     loadMoreGames();
   }
 };
 
-// Reset infinite scroll and fetch from start when filters change
+
 watch([sortBy, sortDir], () => {
   fetchGames(true);
 });
@@ -89,12 +89,12 @@ onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
 });
 
-// Helper for default graphic placeholder when thumbnail is null
+
 const getThumbnail = (thumbnail) => {
   if (thumbnail) {
     return `http://127.0.0.1:8000${thumbnail}`;
   }
-  // Standard minimalist default SVG thumbnail
+  
   return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f1f5f9"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="10" fill="%2394a3b8">No Thumbnail</text></svg>';
 };
 </script>
@@ -107,7 +107,7 @@ const getThumbnail = (thumbnail) => {
         <p>Browse through hundreds of modern and retro browser games online!</p>
       </div>
 
-      <!-- Simple Filter Controllers -->
+      
       <div class="filters">
         <div class="filter-group">
           <label for="sort-by">Sort By</label>
@@ -128,25 +128,25 @@ const getThumbnail = (thumbnail) => {
       </div>
     </div>
 
-    <!-- Notification Banners -->
+    
     <div v-if="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
 
-    <!-- Games Grid List -->
+    
     <div class="games-grid">
       <div v-for="game in games" :key="game.slug" class="game-card">
-        <!-- Game Thumbnail -->
+        
         <div class="thumbnail-wrapper">
           <img :src="getThumbnail(game.thumbnail)" :alt="game.title + ' Thumbnail'" class="game-thumbnail" />
         </div>
 
-        <!-- Game Info -->
+        
         <div class="game-info">
           <h2 class="game-title">{{ game.title }}</h2>
           <span class="score-badge flex-align"><span class="material-symbols-outlined" style="font-size: 1rem; margin-right: 0.25rem;">workspace_premium</span> {{ game.scoreCount }} Scores</span>
           <p class="game-desc">{{ game.description }}</p>
           <div class="author-info">Developer: <strong>{{ game.author }}</strong></div>
 
-          <!-- Accessible Link -->
+          
           <router-link 
             :to="'/games/' + game.slug" 
             :aria-label="'Play ' + game.title + ' developed by ' + game.author" 
@@ -158,7 +158,7 @@ const getThumbnail = (thumbnail) => {
       </div>
     </div>
 
-    <!-- Loading Indicators -->
+    
     <div v-if="loading" class="text-center py-6">
       <p class="loading-text">Loading more games...</p>
     </div>
@@ -210,7 +210,7 @@ const getThumbnail = (thumbnail) => {
   cursor: pointer;
 }
 
-/* Games Grid */
+
 .games-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -248,7 +248,7 @@ const getThumbnail = (thumbnail) => {
 .thumbnail-wrapper {
   position: relative;
   width: 100%;
-  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  padding-top: 56.25%; 
   background-color: var(--bg-primary);
   border-bottom: 1px solid var(--border-color);
 }

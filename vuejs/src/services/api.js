@@ -7,7 +7,7 @@ const api = axios.create({
   }
 });
 
-// Request Interceptor: Automatically attach Sanctum token
+
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -21,17 +21,17 @@ api.interceptors.request.use(
   }
 );
 
-// Response Interceptor: Auto logout if token expires/invalid
+
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Clear session
+      
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      // If we are not already on the login page, redirect
+      
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }

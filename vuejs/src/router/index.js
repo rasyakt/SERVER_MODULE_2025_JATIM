@@ -58,7 +58,7 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    // Catch-all route for any undefined path
+    
     path: '/:pathMatch(.*)*',
     redirect: '/'
   }
@@ -69,7 +69,7 @@ const router = createRouter({
   routes
 });
 
-// Navigation Guards
+
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token');
   const userJson = localStorage.getItem('user');
@@ -77,13 +77,13 @@ router.beforeEach((to, from, next) => {
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!token) {
-      // Redirect to login if not authenticated
+      
       next({ name: 'Login' });
     } else if (to.matched.some(record => record.meta.requiresAdmin)) {
       if (user && user.role === 'admin') {
         next();
       } else {
-        // Redirect non-admins to Home
+        
         next({ name: 'Home' });
       }
     } else {
@@ -91,7 +91,7 @@ router.beforeEach((to, from, next) => {
     }
   } else if (to.matched.some(record => record.meta.guest)) {
     if (token) {
-      // Redirect logged-in users to Home if they visit /login
+      
       next({ name: 'Home' });
     } else {
       next();

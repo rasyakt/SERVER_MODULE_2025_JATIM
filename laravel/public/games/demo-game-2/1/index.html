@@ -134,7 +134,7 @@
 </head>
 <body>
   <div id="game-container">
-    <!-- Splash Screen -->
+    
     <div id="splash">
       <div class="splash-bg"></div>
       <h1>Odyssey II</h1>
@@ -146,14 +146,14 @@
       </div>
     </div>
 
-    <!-- Game Over Screen -->
+    
     <div id="gameover-screen">
       <div class="gameover-title">GAME OVER</div>
       <div class="score-display">Your Score: <span id="final-score">0</span></div>
       <button class="btn" id="restart-btn">Restart Mission</button>
     </div>
 
-    <!-- Game Canvas -->
+    
     <canvas id="gameCanvas"></canvas>
   </div>
 
@@ -166,7 +166,7 @@
     const restartBtn = document.getElementById('restart-btn');
     const finalScoreSpan = document.getElementById('final-score');
 
-    // Audio Context Setup for Sound Effects (Web Audio API)
+    
     let audioCtx = null;
     function initAudio() {
       if (!audioCtx) {
@@ -231,7 +231,7 @@
       osc.stop(now + 0.9);
     }
 
-    // Set canvas dimensions
+    
     function resizeCanvas() {
       canvas.width = canvas.parentElement.clientWidth;
       canvas.height = canvas.parentElement.clientHeight;
@@ -239,7 +239,7 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // Game Variables
+    
     let gameActive = false;
     let score = 0;
     let level = 1;
@@ -260,7 +260,7 @@
     let enemySpawnTimer = 0;
     let shootCooldown = 0;
 
-    // Generate Background Stars
+    
     function generateStars() {
       stars = [];
       for (let i = 0; i < 90; i++) {
@@ -273,7 +273,7 @@
       }
     }
 
-    // Controls listeners
+    
     window.addEventListener('keydown', (e) => {
       keys[e.key] = true;
       if (e.key === ' ' && gameActive) {
@@ -306,7 +306,7 @@
         height: 18,
         speed: 14
       });
-      shootCooldown = 10; // faster shooter!
+      shootCooldown = 10; 
       playLaserSound();
     }
 
@@ -318,7 +318,7 @@
         width: size,
         height: size,
         speed: Math.random() * 2.5 + 2.0 + (level * 0.35),
-        color: `hsl(${Math.random() * 60 + 100}, 95%, 50%)`, // Emerald/green alien colors!
+        color: `hsl(${Math.random() * 60 + 100}, 95%, 50%)`, 
         points: Math.round(size * 1.5)
       });
     }
@@ -367,11 +367,11 @@
       playGameOverSound();
     }
 
-    // Game Loop
+    
     function update() {
       if (!gameActive) return;
 
-      // Player Movement
+      
       if (mouseX !== null) {
         player.x = mouseX - player.width / 2;
       } else {
@@ -383,11 +383,11 @@
         }
       }
 
-      // Constrain player
+      
       if (player.x < 0) player.x = 0;
       if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
 
-      // Update stars
+      
       stars.forEach(star => {
         star.y += star.speed;
         if (star.y > canvas.height) {
@@ -396,10 +396,10 @@
         }
       });
 
-      // Update cooldown
+      
       if (shootCooldown > 0) shootCooldown--;
 
-      // Update Lasers
+      
       lasers.forEach((laser, idx) => {
         laser.y -= laser.speed;
         if (laser.y < -laser.height) {
@@ -407,25 +407,25 @@
         }
       });
 
-      // Spawn Enemies
+      
       enemySpawnTimer++;
       if (enemySpawnTimer > Math.max(25, 70 - level * 5)) {
         spawnEnemy();
         enemySpawnTimer = 0;
       }
 
-      // Update Enemies
+      
       enemies.forEach((enemy, eIdx) => {
         enemy.y += enemy.speed;
 
-        // Game over if enemy passes screen bottom
+        
         if (enemy.y > canvas.height) {
           enemies.splice(eIdx, 1);
           gameOver();
           return;
         }
 
-        // Collision Check: Enemy vs Player
+        
         if (
           player.x < enemy.x + enemy.width &&
           player.x + player.width > enemy.x &&
@@ -437,7 +437,7 @@
           return;
         }
 
-        // Collision Check: Enemy vs Lasers
+        
         lasers.forEach((laser, lIdx) => {
           if (
             laser.x < enemy.x + enemy.width &&
@@ -457,7 +457,7 @@
         });
       });
 
-      // Update Particles
+      
       particles.forEach((particle, idx) => {
         particle.x += particle.vx;
         particle.y += particle.vy;
@@ -469,11 +469,11 @@
     }
 
     function draw() {
-      // Clear Screen with distinct dark emerald background
+      
       ctx.fillStyle = '#021812';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Render Stars
+      
       ctx.fillStyle = '#99f6e4';
       stars.forEach(star => {
         ctx.globalAlpha = star.speed / 2.8;
@@ -489,7 +489,7 @@
         return;
       }
 
-      // Draw Lasers (glowing emerald green)
+      
       ctx.shadowBlur = 10;
       ctx.shadowColor = '#34d399';
       ctx.fillStyle = '#10b981';
@@ -498,7 +498,7 @@
       });
       ctx.shadowBlur = 0;
 
-      // Draw Enemies (glowing hexagonal pods)
+      
       enemies.forEach(enemy => {
         ctx.fillStyle = enemy.color;
         ctx.beginPath();
@@ -515,16 +515,16 @@
         ctx.fillRect(enemy.x + enemy.width / 2 - 2, enemy.y + enemy.height / 2 - 2, 4, 4);
       });
 
-      // Draw Player Space Fighter (Sleek Emerald Starfighter)
+      
       ctx.shadowBlur = 12;
       ctx.shadowColor = '#10b981';
       
-      // Dual Booster Flames
+      
       ctx.fillStyle = Math.random() > 0.5 ? '#10b981' : '#f59e0b';
       ctx.fillRect(player.x + 8, player.y + player.height, 6, 10);
       ctx.fillRect(player.x + player.width - 14, player.y + player.height, 6, 10);
 
-      // Main Ship Body
+      
       ctx.fillStyle = '#ecfdf5';
       ctx.beginPath();
       ctx.moveTo(player.x + player.width / 2, player.y);
@@ -534,7 +534,7 @@
       ctx.closePath();
       ctx.fill();
 
-      // Green Wings Accent
+      
       ctx.fillStyle = '#059669';
       ctx.beginPath();
       ctx.moveTo(player.x + player.width / 2, player.y + 12);
@@ -543,7 +543,7 @@
       ctx.closePath();
       ctx.fill();
 
-      // Red Targeting Radar Cockpit
+      
       ctx.fillStyle = '#ef4444';
       ctx.beginPath();
       ctx.moveTo(player.x + player.width / 2, player.y + 4);
@@ -554,7 +554,7 @@
 
       ctx.shadowBlur = 0;
 
-      // Draw Particles
+      
       particles.forEach(p => {
         ctx.fillStyle = p.color;
         ctx.globalAlpha = p.alpha;
@@ -564,7 +564,7 @@
       });
       ctx.globalAlpha = 1.0;
 
-      // Draw HUD
+      
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 16px "Courier New", monospace';
       ctx.textAlign = 'left';

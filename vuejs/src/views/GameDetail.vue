@@ -13,7 +13,7 @@ const loading = ref(true);
 const scoresLoading = ref(false);
 const errorMsg = ref('');
 
-// Score submission
+
 const scoreInput = ref(null);
 const submitting = ref(false);
 const submitSuccess = ref(false);
@@ -49,7 +49,7 @@ onMounted(async () => {
   await fetchScores(true);
   loading.value = false;
 
-  // Poll highscores every 5 seconds to keep it automatically updated!
+  
   pollingInterval = setInterval(() => {
     fetchScores(false);
   }, 5000);
@@ -61,7 +61,7 @@ onUnmounted(() => {
   }
 });
 
-// Highscore display logic with ranking highlight
+
 const displayedScores = computed(() => {
   if (!scores.value.length || !currentUser) return [];
 
@@ -77,12 +77,12 @@ const displayedScores = computed(() => {
 
   const isUserInTopTen = topTen.some(score => score.isSelf);
 
-  // If user has a score but it is below top 10, append it at the bottom without rank
+  
   if (!isUserInTopTen) {
     const myBestScore = scores.value.find(s => s.username === currentUser.username);
     if (myBestScore) {
       topTen.push({
-        rank: '-', // Shown without rank
+        rank: '-', 
         username: myBestScore.username,
         score: myBestScore.score,
         timestamp: myBestScore.timestamp,
@@ -111,7 +111,7 @@ const handlePostScore = async () => {
     if (response.data.status === 'success') {
       submitSuccess.value = true;
       scoreInput.value = null;
-      // Immediately refresh scores
+      
       fetchScores(false);
 
       setTimeout(() => {
@@ -125,12 +125,12 @@ const handlePostScore = async () => {
   }
 };
 
-// Check if current user is author of the game to show manage link
+
 const isAuthor = computed(() => {
   return game.value && currentUser && game.value.author === currentUser.username;
 });
 
-// Format game path to full iframe URL
+
 const gameIframeUrl = computed(() => {
   if (game.value && game.value.gamePath) {
     return `http://127.0.0.1:8000${game.value.gamePath}`;
@@ -141,12 +141,12 @@ const gameIframeUrl = computed(() => {
 
 <template>
   <div class="container">
-    <!-- Loading Screen -->
+    
     <div v-if="loading" class="text-center py-12">
       <p>Loading game details and rankings...</p>
     </div>
 
-    <!-- Error Screen -->
+    
     <div v-else-if="errorMsg || !game" class="card text-center py-12">
       <h2 class="text-danger">Game Not Found</h2>
       <p>{{ errorMsg || 'The requested game does not exist or has been deleted.' }}</p>
@@ -154,7 +154,7 @@ const gameIframeUrl = computed(() => {
     </div>
 
     <div v-else>
-      <!-- Game Info Header -->
+      
       <div class="game-header card flex-between mb-6">
         <div class="header-content">
           <div v-if="game.thumbnail" class="game-header-thumb-wrapper">
@@ -171,9 +171,9 @@ const gameIframeUrl = computed(() => {
         </div>
       </div>
 
-      <!-- Iframe Game Player & Scoreboard Grid -->
+      
       <div class="grid-layout">
-        <!-- Left: Game Iframe Player -->
+        
         <div class="game-player card">
           <h2>Game Screen</h2>
           
@@ -193,7 +193,7 @@ const gameIframeUrl = computed(() => {
             </p>
           </div>
 
-          <!-- Simulated Score Submission (Very useful helper!) -->
+          
           <div class="score-simulator mt-4 pt-4">
             <h3>Post Score simulation</h3>
             <p class="mb-4">Use this form to post your game scores directly and test the leaderboard ranking system.</p>
@@ -214,7 +214,7 @@ const gameIframeUrl = computed(() => {
           </div>
         </div>
 
-        <!-- Right: Leaderboard Highscores -->
+        
         <div class="scoreboard card">
           <h2 class="flex-align"><span class="material-symbols-outlined" style="margin-right: 0.5rem; font-size: 1.5rem;">workspace_premium</span> Top Highscores</h2>
           <p class="mb-4">leaderboard updates automatically every 5 seconds.</p>
@@ -317,7 +317,7 @@ const gameIframeUrl = computed(() => {
 .iframe-container {
   position: relative;
   width: 100%;
-  padding-top: 56.25%; /* 16:9 aspect ratio */
+  padding-top: 56.25%; 
   border: 1px solid var(--border-color);
   border-radius: 6px;
   background-color: #000;
@@ -355,7 +355,7 @@ const gameIframeUrl = computed(() => {
   max-width: 200px;
 }
 
-/* Score Highlight rules */
+
 .self-highlight {
   background-color: #eff6ff !important;
   border-left: 3px solid var(--color-primary);

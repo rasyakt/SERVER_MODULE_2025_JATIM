@@ -18,9 +18,9 @@ class GameVersion extends Model
         'thumbnail',
     ];
 
-    /**
-     * Get the game this version belongs to.
-     */
+    
+
+
     public function game()
     {
         return $this->belongsTo(Game::class, 'game_id');

@@ -10,9 +10,9 @@ use Illuminate\Validation\ValidationException;
 
 class ScoreController extends Controller
 {
-    /**
-     * Get highest scores of each player for a game (sorted by score descending).
-     */
+    
+
+
     public function index($slug)
     {
         $game = Game::where('slug', $slug)->first();
@@ -28,12 +28,12 @@ class ScoreController extends Controller
             ->with('user')
             ->get();
 
-        // Get only the highest score for each unique player (user_id)
+        
         $userHighestScores = $scores->groupBy('user_id')->map(function($userScores) {
             return $userScores->sortByDesc('score')->first();
         });
 
-        // Sort all players highest scores by score descending
+        
         $sortedScores = $userHighestScores->sortByDesc('score')->values();
 
         $scoresData = [];
@@ -52,9 +52,9 @@ class ScoreController extends Controller
         ], 200);
     }
 
-    /**
-     * Post a new score for the authenticated player.
-     */
+    
+
+
     public function store(Request $request, $slug)
     {
         $game = Game::where('slug', $slug)->first();
@@ -74,7 +74,7 @@ class ScoreController extends Controller
             throw new ValidationException($validator);
         }
 
-        // The game version associated to the score is the latest one available
+        
         $latestVersion = $game->versions()->orderBy('version', 'desc')->first();
 
         Score::create([

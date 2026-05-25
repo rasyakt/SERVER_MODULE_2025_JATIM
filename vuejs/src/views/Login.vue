@@ -5,12 +5,12 @@ import api from '../services/api';
 
 const router = useRouter();
 
-const activeTab = ref('signin'); // 'signin' or 'signup'
+const activeTab = ref('signin'); 
 const username = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 
-// Password Visibility toggles
+
 const showPassword = ref(false);
 const showRegPassword = ref(false);
 const showConfirmPassword = ref(false);
@@ -96,7 +96,7 @@ const handleSignUp = async () => {
     if (error.response && error.response.data) {
       const data = error.response.data;
       if (data.violations) {
-        // Format kustom error validasi
+        
         const fields = Object.keys(data.violations);
         errorMsg.value = data.violations[fields[0]].message;
       } else {
@@ -119,7 +119,7 @@ const handleSignUp = async () => {
         <p>Manage, upload, and play amazing web games.</p>
       </div>
 
-      <!-- Tab Selectors -->
+      
       <div class="login-tabs">
         <button 
           @click="activeTab = 'signin'; resetForm()" 
@@ -137,11 +137,11 @@ const handleSignUp = async () => {
         </button>
       </div>
 
-      <!-- Notification Alerts -->
+      
       <div v-if="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
       <div v-if="successMsg" class="alert alert-success">{{ successMsg }}</div>
 
-      <!-- Sign In Form -->
+      
       <form v-if="activeTab === 'signin'" @submit.prevent="handleSignIn" class="login-form">
         <div class="form-group">
           <label class="form-label" for="username">Username</label>
@@ -175,7 +175,7 @@ const handleSignUp = async () => {
         </button>
       </form>
 
-      <!-- Sign Up Form -->
+      
       <form v-if="activeTab === 'signup'" @submit.prevent="handleSignUp" class="login-form">
         <div class="form-group">
           <label class="form-label" for="reg-username">Username</label>

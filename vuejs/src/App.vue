@@ -15,7 +15,7 @@ const loadUser = () => {
   user.value = userJson ? JSON.parse(userJson) : null;
 };
 
-// Listen to route changes to dynamically refresh user state
+
 watch(() => route.path, () => {
   loadUser();
 });
@@ -34,12 +34,12 @@ const isAdmin = computed(() => {
 
 const handleLogout = async () => {
   try {
-    // Attempt signout on backend
+    
     await api.post('/auth/signout');
   } catch (error) {
     console.error('Signout failed on backend', error);
   } finally {
-    // Clear session storage locally in all circumstances
+    
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     token.value = null;
@@ -51,17 +51,17 @@ const handleLogout = async () => {
 
 <template>
   <div id="app">
-    <!-- Navbar (Visible only if logged in) -->
+    
     <nav v-if="isLoggedIn" class="navbar">
       <div class="nav-brand">
         <router-link to="/"><span class="material-symbols-outlined">sports_esports</span> LKS Gaming</router-link>
       </div>
 
-      <!-- Navigation Links -->
+      
       <div class="nav-links">
         <router-link to="/" class="nav-item" exact-active-class="active">Home</router-link>
 
-        <!-- Admin Only Menu -->
+        
         <template v-if="isAdmin">
           <router-link to="/admins" class="nav-item" exact-active-class="active">List Admin</router-link>
           <router-link to="/users" class="nav-item" exact-active-class="active">List User</router-link>
@@ -89,7 +89,7 @@ const handleLogout = async () => {
 </template>
 
 <style>
-/* Navigation Active Link Styling */
+
 .navbar a.router-link-active {
   color: var(--text-main);
   border-bottom: 2px solid var(--color-primary);

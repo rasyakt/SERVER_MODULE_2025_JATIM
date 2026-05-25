@@ -13,9 +13,9 @@ use ZipArchive;
 
 class GameController extends Controller
 {
-    /**
-     * Get a paginated, sorted list of games (having versions).
-     */
+    
+
+
     public function index(Request $request)
     {
         $page = (int) $request->query('page', 0);
@@ -30,17 +30,17 @@ class GameController extends Controller
             $sortDir = 'asc';
         }
 
-        // Must only include games that have at least one version
+        
         $query = Game::has('versions')->with(['author', 'versions', 'scores']);
 
-        // Apply sorting
+        
         if ($sortBy === 'title') {
             $query->orderBy('title', $sortDir);
         } elseif ($sortBy === 'popular') {
-            // Sort by total score records count
+            
             $query->withCount('scores')->orderBy('scores_count', $sortDir);
         } elseif ($sortBy === 'uploaddate') {
-            // Sort by latest version creation timestamp
+            
             $query->select('games.*')
                 ->join('game_versions as gv', function($join) {
                     $join->on('games.id', '=', 'gv.game_id')
@@ -73,9 +73,9 @@ class GameController extends Controller
         ], 200);
     }
 
-    /**
-     * Create a new game (Developer/User).
-     */
+    
+
+
     public function store(Request $request)
     {
         if ($request->user()->role !== 'dev') {
@@ -96,7 +96,7 @@ class GameController extends Controller
 
         $slug = Str::slug($request->title);
 
-        // Check if slug is unique
+        
         if (Game::where('slug', $slug)->exists()) {
             return response()->json([
                 'status' => 'invalid',
@@ -117,9 +117,9 @@ class GameController extends Controller
         ], 201);
     }
 
-    /**
-     * Get details of a single game by slug.
-     */
+    
+
+
     public function show($slug)
     {
         $game = Game::where('slug', $slug)->with(['author', 'versions', 'scores'])->first();
@@ -146,9 +146,9 @@ class GameController extends Controller
         ], 200);
     }
 
-    /**
-     * Update title and description (Author Only).
-     */
+    
+
+
     public function update(Request $request, $slug)
     {
         if ($request->user()->role !== 'dev') {
@@ -193,9 +193,9 @@ class GameController extends Controller
         ], 200);
     }
 
-    /**
-     * Delete a game, versions, and scores (Author Only).
-     */
+    
+
+
     public function destroy(Request $request, $slug)
     {
         if ($request->user()->role !== 'dev') {
@@ -226,12 +226,12 @@ class GameController extends Controller
         return response()->noContent();
     }
 
-    /**
-     * Upload game files (Non-REST, Zip upload, Token in parameter or header).
-     */
+    
+
+
     public function upload(Request $request, $slug)
     {
-        // 1. Authenticate manually using token form/query parameter or Bearer header
+        
         $token = $request->input('token') ?? $request->bearerToken();
 
         if (!$token) {
@@ -253,34 +253,34 @@ class GameController extends Controller
             return response('User blocked: ' . ($user->block_reason ?? 'You have been blocked by an administrator'), 403)->header('Content-Type', 'text/plain');
         }
 
-        // 2. Find game
+        
         $game = Game::where('slug', $slug)->first();
         if (!$game) {
             return response('Game not found', 404)->header('Content-Type', 'text/plain');
         }
 
-        // 3. Check author
+        
         if ($game->author_id !== $user->id) {
             return response('User is not author of the game', 403)->header('Content-Type', 'text/plain');
         }
 
-        // 4. Validate zipfile
+        
         if (!$request->hasFile('zipfile') || !$request->file('zipfile')->isValid()) {
             return response('No zip file provided', 400)->header('Content-Type', 'text/plain');
         }
 
         $file = $request->file('zipfile');
 
-        // 5. Versioning
+        
         $latestVersion = $game->versions()->max('version') ?? 0;
         $newVersion = $latestVersion + 1;
 
-        // 6. Extract Zip file
+        
         $zip = new ZipArchive();
         if ($zip->open($file->getRealPath()) === true) {
             $destPath = public_path("games/{$slug}/{$newVersion}");
             
-            // Create destination folder if not exists
+            
             if (!file_exists($destPath)) {
                 mkdir($destPath, 0777, true);
             }
@@ -291,11 +291,11 @@ class GameController extends Controller
             return response('Could not open ZIP file', 400)->header('Content-Type', 'text/plain');
         }
 
-        // 7. Check for thumbnail.png
+        
         $hasThumbnail = file_exists($destPath . '/thumbnail.png');
         $thumbnailUrl = $hasThumbnail ? "/games/{$slug}/{$newVersion}/thumbnail.png" : null;
 
-        // 8. Create GameVersion record
+        
         $gameVersion = GameVersion::create([
             'game_id' => $game->id,
             'version' => $newVersion,

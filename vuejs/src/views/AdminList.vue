@@ -32,15 +32,15 @@ onMounted(() => {
       <p>Overview of all system administrators in the platform.</p>
     </div>
 
-    <!-- Notification Alert -->
+    
     <div v-if="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
 
-    <!-- Loading Skeleton -->
+    
     <div v-if="loading" class="text-center py-8">
       <p>Loading administrator list...</p>
     </div>
 
-    <!-- Admin List Table -->
+    
     <div v-else class="table-responsive">
       <table class="table">
         <thead>

@@ -133,7 +133,7 @@
 </head>
 <body>
   <div id="game-container">
-    <!-- Splash Screen -->
+    
     <div id="splash">
       <div class="splash-bg"></div>
       <h1>Cosmic Odyssey</h1>
@@ -145,14 +145,14 @@
       </div>
     </div>
 
-    <!-- Game Over Screen -->
+    
     <div id="gameover-screen">
       <div class="gameover-title">GAME OVER</div>
       <div class="score-display">Your Score: <span id="final-score">0</span></div>
       <button class="btn" id="restart-btn">Restart Mission</button>
     </div>
 
-    <!-- Game Canvas -->
+    
     <canvas id="gameCanvas"></canvas>
   </div>
 
@@ -165,7 +165,7 @@
     const restartBtn = document.getElementById('restart-btn');
     const finalScoreSpan = document.getElementById('final-score');
 
-    // Audio Context Setup for Sound Effects (Web Audio API)
+    
     let audioCtx = null;
     function initAudio() {
       if (!audioCtx) {
@@ -230,7 +230,7 @@
       osc.stop(now + 1.0);
     }
 
-    // Set canvas dimensions
+    
     function resizeCanvas() {
       canvas.width = canvas.parentElement.clientWidth;
       canvas.height = canvas.parentElement.clientHeight;
@@ -238,7 +238,7 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // Game Variables
+    
     let gameActive = false;
     let score = 0;
     let level = 1;
@@ -259,7 +259,7 @@
     let enemySpawnTimer = 0;
     let shootCooldown = 0;
 
-    // Generate Background Stars
+    
     function generateStars() {
       stars = [];
       for (let i = 0; i < 80; i++) {
@@ -272,7 +272,7 @@
       }
     }
 
-    // Controls listeners
+    
     window.addEventListener('keydown', (e) => {
       keys[e.key] = true;
       if (e.key === ' ' && gameActive) {
@@ -287,7 +287,7 @@
 
     canvas.addEventListener('mousemove', (e) => {
       const rect = canvas.getBoundingClientRect();
-      // Translate mouse coordinates based on CSS stretch
+      
       mouseX = ((e.clientX - rect.left) / rect.width) * canvas.width;
     });
 
@@ -306,7 +306,7 @@
         height: 15,
         speed: 12
       });
-      shootCooldown = 12; // cooldown frames
+      shootCooldown = 12; 
       playLaserSound();
     }
 
@@ -367,11 +367,11 @@
       playGameOverSound();
     }
 
-    // Game Loop
+    
     function update() {
       if (!gameActive) return;
 
-      // Player Movement
+      
       if (mouseX !== null) {
         player.x = mouseX - player.width / 2;
       } else {
@@ -383,11 +383,11 @@
         }
       }
 
-      // Constrain player to screen boundaries
+      
       if (player.x < 0) player.x = 0;
       if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
 
-      // Update background stars
+      
       stars.forEach(star => {
         star.y += star.speed;
         if (star.y > canvas.height) {
@@ -396,10 +396,10 @@
         }
       });
 
-      // Update shoot cooldown
+      
       if (shootCooldown > 0) shootCooldown--;
 
-      // Update Lasers
+      
       lasers.forEach((laser, idx) => {
         laser.y -= laser.speed;
         if (laser.y < -laser.height) {
@@ -407,25 +407,25 @@
         }
       });
 
-      // Spawn Enemies
+      
       enemySpawnTimer++;
       if (enemySpawnTimer > Math.max(30, 80 - level * 5)) {
         spawnEnemy();
         enemySpawnTimer = 0;
       }
 
-      // Update Enemies
+      
       enemies.forEach((enemy, eIdx) => {
         enemy.y += enemy.speed;
 
-        // Game over if enemy passes screen bottom
+        
         if (enemy.y > canvas.height) {
           enemies.splice(eIdx, 1);
           gameOver();
           return;
         }
 
-        // Collision Check: Enemy vs Player
+        
         if (
           player.x < enemy.x + enemy.width &&
           player.x + player.width > enemy.x &&
@@ -437,7 +437,7 @@
           return;
         }
 
-        // Collision Check: Enemy vs Lasers
+        
         lasers.forEach((laser, lIdx) => {
           if (
             laser.x < enemy.x + enemy.width &&
@@ -445,13 +445,13 @@
             laser.y < enemy.y + enemy.height &&
             laser.y + laser.height > enemy.y
           ) {
-            // Hit! Create explosion and clean up
+            
             createExplosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, enemy.color);
             enemies.splice(eIdx, 1);
             lasers.splice(lIdx, 1);
             score += enemy.points;
             
-            // Speed up / Level up logic
+            
             if (score > level * 500) {
               level++;
             }
@@ -459,7 +459,7 @@
         });
       });
 
-      // Update Particles
+      
       particles.forEach((particle, idx) => {
         particle.x += particle.vx;
         particle.y += particle.vy;
@@ -471,20 +471,20 @@
     }
 
     function draw() {
-      // Clear Screen
+      
       ctx.fillStyle = '#030712';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Render Parallax Stars
+      
       ctx.fillStyle = '#ffffff';
       stars.forEach(star => {
-        ctx.globalAlpha = star.speed / 2; // Brighter star = faster
+        ctx.globalAlpha = star.speed / 2; 
         ctx.fillRect(star.x, star.y, star.size, star.size);
       });
       ctx.globalAlpha = 1.0;
 
       if (!gameActive) {
-        // Draw splash screen background loop
+        
         ctx.fillStyle = 'rgba(59, 130, 246, 0.05)';
         ctx.beginPath();
         ctx.arc(canvas.width / 2, canvas.height / 2, 200, 0, Math.PI * 2);
@@ -492,16 +492,16 @@
         return;
       }
 
-      // Draw Lasers (glowing neon blue bars)
+      
       ctx.shadowBlur = 8;
       ctx.shadowColor = '#60a5fa';
       ctx.fillStyle = '#3b82f6';
       lasers.forEach(laser => {
         ctx.fillRect(laser.x - laser.width / 2, laser.y, laser.width, laser.height);
       });
-      ctx.shadowBlur = 0; // reset shadow
+      ctx.shadowBlur = 0; 
 
-      // Draw Enemies (glowing pixel triangles)
+      
       enemies.forEach(enemy => {
         ctx.fillStyle = enemy.color;
         ctx.beginPath();
@@ -511,16 +511,16 @@
         ctx.closePath();
         ctx.fill();
 
-        // Draw cockpit eye for menacing look!
+        
         ctx.fillStyle = '#000';
         ctx.fillRect(enemy.x + enemy.width / 2 - 2, enemy.y + enemy.height / 3, 4, 4);
       });
 
-      // Draw Player Space Fighter (premium custom drawing instead of image)
+      
       ctx.shadowBlur = 10;
       ctx.shadowColor = '#3b82f6';
       
-      // Booster Flame
+      
       ctx.fillStyle = Math.random() > 0.5 ? '#f97316' : '#ef4444';
       ctx.beginPath();
       ctx.moveTo(player.x + player.width / 2 - 5, player.y + player.height);
@@ -529,7 +529,7 @@
       ctx.closePath();
       ctx.fill();
 
-      // Main Ship Body
+      
       ctx.fillStyle = '#f8fafc';
       ctx.beginPath();
       ctx.moveTo(player.x + player.width / 2, player.y);
@@ -539,7 +539,7 @@
       ctx.closePath();
       ctx.fill();
 
-      // Blue Wings Accent
+      
       ctx.fillStyle = '#2563eb';
       ctx.beginPath();
       ctx.moveTo(player.x + player.width / 2, player.y + 10);
@@ -548,7 +548,7 @@
       ctx.closePath();
       ctx.fill();
 
-      // Yellow Cockpit
+      
       ctx.fillStyle = '#fbbf24';
       ctx.beginPath();
       ctx.moveTo(player.x + player.width / 2, player.y + 5);
@@ -557,9 +557,9 @@
       ctx.closePath();
       ctx.fill();
 
-      ctx.shadowBlur = 0; // reset shadow
+      ctx.shadowBlur = 0; 
 
-      // Draw Explosions / Particles
+      
       particles.forEach(p => {
         ctx.fillStyle = p.color;
         ctx.globalAlpha = p.alpha;
@@ -569,7 +569,7 @@
       });
       ctx.globalAlpha = 1.0;
 
-      // Draw HUD (Heads-Up Display)
+      
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 16px "Courier New", monospace';
       ctx.textAlign = 'left';
@@ -581,18 +581,18 @@
       ctx.fillText(`DEFENSE BAR: ONLINE`, canvas.width - 20, 30);
     }
 
-    // Main Run Loops
+    
     function loop() {
       update();
       draw();
       requestAnimationFrame(loop);
     }
 
-    // Buttons bindings
+    
     startBtn.addEventListener('click', startNewGame);
     restartBtn.addEventListener('click', startNewGame);
 
-    // Bootstrap star loop preview in splash
+    
     generateStars();
     resizeCanvas();
     requestAnimationFrame(loop);

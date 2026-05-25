@@ -7,16 +7,16 @@ const loading = ref(true);
 const errorMsg = ref('');
 const successMsg = ref('');
 
-// CRUD modal variables
+
 const isModalOpen = ref(false);
-const modalMode = ref('create'); // 'create' or 'edit'
+const modalMode = ref('create'); 
 const userIdToEdit = ref(null);
 const usernameInput = ref('');
 const passwordInput = ref('');
 const modalErrorMsg = ref('');
 const showPasswordModal = ref(false);
 
-// Block popup variables
+
 const isBlockModalOpen = ref(false);
 const userIdToBlock = ref(null);
 const blockReasonInput = ref('');
@@ -53,7 +53,7 @@ const openEditModal = (user) => {
   modalMode.value = 'edit';
   userIdToEdit.value = user.id;
   usernameInput.value = user.username;
-  passwordInput.value = ''; // Leave password input blank for edit
+  passwordInput.value = ''; 
   modalErrorMsg.value = '';
   showPasswordModal.value = false;
   isModalOpen.value = true;
@@ -188,16 +188,16 @@ const handleBlockSubmit = async () => {
       <button @click="openCreateModal" class="btn btn-primary"><span class="material-symbols-outlined">add</span> Create User</button>
     </div>
 
-    <!-- Notification Banners -->
+    
     <div v-if="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
     <div v-if="successMsg" class="alert alert-success">{{ successMsg }}</div>
 
-    <!-- Loading Screen -->
+    
     <div v-if="loading" class="text-center py-8">
       <p>Loading users list...</p>
     </div>
 
-    <!-- Users Table -->
+    
     <div v-else class="table-responsive">
       <table class="table">
         <thead>
@@ -227,7 +227,7 @@ const handleBlockSubmit = async () => {
               </span>
             </td>
             <td class="text-right action-buttons">
-              <!-- Block / Unblock Toggle -->
+              
               <button 
                 v-if="user.is_blocked" 
                 @click="handleUnblock(user)" 
@@ -243,7 +243,7 @@ const handleBlockSubmit = async () => {
                 Block
               </button>
 
-              <!-- Edit & Delete -->
+              
               <button @click="openEditModal(user)" class="btn btn-secondary btn-sm">Edit</button>
               <button @click="handleDeleteUser(user)" class="btn btn-danger btn-sm">Delete</button>
             </td>
@@ -255,7 +255,7 @@ const handleBlockSubmit = async () => {
       </table>
     </div>
 
-    <!-- CRUD Modal Dialog (Create/Edit) -->
+    
     <div v-if="isModalOpen" class="modal-overlay">
       <div class="modal-content">
         <h2>{{ modalMode === 'create' ? 'Create User' : 'Edit User' }}</h2>
@@ -298,7 +298,7 @@ const handleBlockSubmit = async () => {
       </div>
     </div>
 
-    <!-- Block Reason Prompt Modal -->
+    
     <div v-if="isBlockModalOpen" class="modal-overlay">
       <div class="modal-content">
         <h2>Block User</h2>

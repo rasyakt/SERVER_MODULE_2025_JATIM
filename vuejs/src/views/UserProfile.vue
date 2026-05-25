@@ -24,7 +24,7 @@ const fetchProfile = async () => {
   }
 };
 
-// Re-fetch profile if username parameter in URL changes
+
 watch(() => route.params.username, (newUsername) => {
   if (newUsername) {
     username.value = newUsername;
@@ -36,7 +36,7 @@ onMounted(() => {
   fetchProfile();
 });
 
-// Helper for default graphic placeholder when thumbnail is null
+
 const getThumbnail = (thumbnail) => {
   if (thumbnail) {
     return `http://127.0.0.1:8000${thumbnail}`;
@@ -44,7 +44,7 @@ const getThumbnail = (thumbnail) => {
   return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f1f5f9"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="10" fill="%2394a3b8">No Thumbnail</text></svg>';
 };
 
-// Game Creation State
+
 const isGameModalOpen = ref(false);
 const titleInput = ref('');
 const descInput = ref('');
@@ -83,7 +83,7 @@ const handleCreateGame = async () => {
 
     if (response.data.status === 'success') {
       isGameModalOpen.value = false;
-      // Refresh user profile to show newly created game
+      
       fetchProfile();
     }
   } catch (error) {
@@ -106,12 +106,12 @@ const handleCreateGame = async () => {
 
 <template>
   <div class="container">
-    <!-- Loading Screen -->
+    
     <div v-if="loading" class="text-center py-12">
       <p>Loading profile details...</p>
     </div>
 
-    <!-- Error Screen -->
+    
     <div v-else-if="errorMsg || !profile" class="card text-center py-12">
       <h2 class="text-danger">Profile Not Found</h2>
       <p>{{ errorMsg || 'The requested user profile does not exist.' }}</p>
@@ -119,7 +119,7 @@ const handleCreateGame = async () => {
     </div>
 
     <div v-else>
-      <!-- User Profile Header -->
+      
       <div class="profile-header card flex-between mb-6">
         <div class="flex-align" style="gap: 2rem;">
           <div class="profile-avatar"><span class="material-symbols-outlined" style="font-size: 3.5rem; color: var(--text-muted);">person</span></div>
@@ -135,7 +135,7 @@ const handleCreateGame = async () => {
         </div>
       </div>
 
-      <!-- Welcome Developer Card (Shown only when developer has no games created yet) -->
+      
       <div v-if="isDeveloper && isMyProfile && (!profile.authoredGames || profile.authoredGames.length === 0)" class="mb-6 card text-center py-8">
         <h2>No Games Created Yet</h2>
         <p class="mb-4">As a developer, you can create and upload browser games to the portal!</p>
@@ -144,7 +144,7 @@ const handleCreateGame = async () => {
         </button>
       </div>
 
-      <!-- Authored Games Section (Omitted if user has not uploaded any games) -->
+      
       <div v-if="profile.authoredGames && profile.authoredGames.length > 0" class="mb-6">
         <h2 class="section-title">Authored Games</h2>
         <p class="section-subtitle">Games developed and updated by {{ profile.username }}.</p>
@@ -152,12 +152,12 @@ const handleCreateGame = async () => {
         <div class="games-list mt-4">
           <div v-for="game in profile.authoredGames" :key="game.slug" class="authored-game-card card">
             <div class="game-item-layout">
-              <!-- Thumbnail -->
+              
               <div class="game-thumb-wrapper">
                 <img :src="getThumbnail(game.thumbnail)" :alt="game.title + ' Thumbnail'" class="game-thumb" />
               </div>
 
-              <!-- Info -->
+              
               <div class="game-details">
                 <h3 class="game-title">{{ game.title }}</h3>
                 <span v-if="game.scoreCount !== undefined" class="score-badge flex-align"><span class="material-symbols-outlined" style="font-size: 0.9rem; margin-right: 0.25rem;">workspace_premium</span> {{ game.scoreCount }} scores submitted</span>
@@ -172,7 +172,7 @@ const handleCreateGame = async () => {
         </div>
       </div>
 
-      <!-- Highscores Section -->
+      
       <div class="highscores-section mb-6">
         <h2 class="section-title">Personal Best Highscores</h2>
         <p class="section-subtitle">Highest scores achieved by {{ profile.username }} grouped by game played (Sorted alphabetically by game title).</p>
@@ -204,7 +204,7 @@ const handleCreateGame = async () => {
         </div>
       </div>
     </div>
-    <!-- Create Game Modal Overlay -->
+    
     <div v-if="isGameModalOpen" class="modal-overlay">
       <div class="modal-content">
         <h2>Create New Game</h2>
@@ -293,7 +293,7 @@ const handleCreateGame = async () => {
   color: var(--text-muted);
 }
 
-/* Authored Games List Layout */
+
 .game-item-layout {
   display: flex;
   gap: 1.5rem;
